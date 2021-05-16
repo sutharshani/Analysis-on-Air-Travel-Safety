@@ -1,0 +1,111 @@
+---
+title: 'Week 2: 1.2 Exercises: Charts'
+author: "Shani Kumar"
+date: "9/13/2020"
+output:
+  word_document: default
+  pdf_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Week 2: 1.2 Exercises: Charts
+
+You need to submit 3 bar charts, 3 stacked bar charts, 3 pie charts, and 3 donut charts using Tableau or PowerBI, Python and R using the data from the link below (the link will download a zipped folder containing three data files.) You may also use your own datasets if you wish. You can also submit using D3 if you choose – but it is not required. You can choose which library to use in Python or R, documentation is provided to help you decide and as you start to play around in the libraries, you will decide which you prefer.
+
+**Data source**
+We are using dataset from [Data Source URL](https://content.bellevue.edu/cst/dsc/640/datasets/ex1-2.zip) file.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# import libraries
+library(ggplot2)
+library("xlsx")
+library(reshape2)
+library("dplyr") 
+```
+```{r read, echo=FALSE}
+obama_issue_rating = read.xlsx(file = "ex1-2/obama-approval-ratings.xls", sheetIndex = 1, stringsAsFactors = FALSE)
+# Show the data sample
+head(obama_issue_rating)
+
+```
+
+### Data structure:
+```{r echo=FALSE}
+str(obama_issue_rating)
+```
+
+\pagebreak
+
+### Construct Charts:
+
+**Bar Chart**
+
+```{r echo=FALSE}
+plt <- ggplot(data = obama_issue_rating, aes(x=Issue, y=Approve)) + geom_bar(stat = "identity")
+plt + theme(axis.text.x=element_text(angle=90, hjust=1))
+```
+
+\pagebreak
+
+**Stacked Bar Chart**
+
+Used melt to tranform dataset
+
+```{r echo=FALSE}
+obama_rating_malt <- melt(obama_issue_rating)
+plt2 <- ggplot(data = obama_rating_malt, aes(x = Issue, y = value, fill = variable)) + 
+  geom_bar(stat = "identity") + 
+  theme(axis.text.x=element_text(angle=90, hjust=1))
+plt2
+```
+
+\pagebreak
+
+**Pie Chart : Issue Approve Rating**
+
+To put the labels in the center of pies, I used cumsum(Approve) - 0.5*Approve as label position.
+
+```{r echo=FALSE}
+# Add label position
+obama_issue_rating <- obama_issue_rating %>% 
+  arrange(desc(Issue)) %>%
+  mutate(lab.ypos = cumsum(Approve) - 0.5*Approve)
+
+# Plot Pie Chart now
+plt3 <- ggplot(data = obama_issue_rating, aes(x="", y=Approve, fill=Issue)) + 
+  geom_bar(width = 1, stat = "identity", color = "white") +
+  theme(axis.text.x=element_text(angle=90, hjust=1)) + 
+  coord_polar("y", start=0) + 
+  geom_text(aes(y = lab.ypos, label = Approve), color = "white") +  
+  theme_void()
+
+plt3
+```
+
+
+**Donut Chart : Issue Disapprove Rating**
+
+To put the labels in the center of pies, I used cumsum(Disapprove) - 0.5*Disapprove as label position.
+
+```{r echo=FALSE}
+
+# Add label position
+obama_issue_rating <- obama_issue_rating %>% 
+  arrange(desc(Issue)) %>%
+  mutate(lab.ypos = cumsum(Disapprove) - 0.5*Disapprove)
+
+# Plot Donut Chart now
+plt4 <- ggplot(data = obama_issue_rating, aes(x=2 , y=Disapprove, fill=Issue)) + 
+  geom_bar(stat = "identity", color = "white") +
+  theme(axis.text.x=element_text(angle=90, hjust=1)) + 
+  coord_polar("y", start=0) + 
+  geom_text(aes(y = lab.ypos, label = Disapprove), color = "white") +  
+  theme_void() +
+  xlim(0.5, 2.5)
+
+plt4
+```
