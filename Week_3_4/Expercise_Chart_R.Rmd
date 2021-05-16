@@ -1,0 +1,60 @@
+---
+title: 'Week 3-4: Exercises: Line Charts & Step Charts'
+author: "Shani Kumar"
+output:
+  pdf_document:
+    df_print: paged
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Week 3-4: Exercises: Charts
+
+You need to submit 3 line charts and 3 step charts using Tableau or PowerBI, Python and R using the data below (or your own datasets). You can also submit using D3, though not required. You can choose which library to use in Python or R, documentation is provided to help you decide and as you start to play around in the libraries, you will decide which you prefer.
+
+**Data source**
+We are using dataset from [Data Source URL](https://content.bellevue.edu/cst/dsc/640/datasets/ex2-2.zip) file.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# import libraries
+library(ggplot2)
+library("xlsx")
+library(reshape2)
+library("dplyr") 
+library(numbers)
+```
+```{r read, echo=FALSE}
+world_population = read.xlsx(file = "world-population.xlsm", sheetIndex = 1, stringsAsFactors = FALSE)
+# Show the data sample
+head(world_population)
+
+```
+
+### Data structure:
+```{r echo=FALSE}
+str(world_population)
+```
+
+\pagebreak
+
+### Construct Charts:
+
+**Line Chart**
+
+```{r echo=FALSE}
+plt <- ggplot(data = world_population, aes(x=Year, y=Population)) + geom_line()
+plt + theme(axis.text.x=element_text(angle=90, hjust=1)) + ggtitle("World Population 1960-2009")
+```
+
+\pagebreak
+
+**Step Chart**
+
+```{r echo=FALSE}
+step_year5 <- world_population %>% filter(mod(world_population$Year,5) == 0)
+plt <- ggplot(data = step_year5, aes(x=Year, y=Population)) + geom_step()
+plt + theme(axis.text.x=element_text(angle=90, hjust=1)) + ggtitle("World Population 1960-2005")
+```

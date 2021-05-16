@@ -1,0 +1,119 @@
+---
+title: 'Week 11-12: Prepare - Histograms, Box Plots, & Bullet Charts'
+author: "Shani Kumar"
+output:
+  html_document:
+    df_print: paged
+  pdf_document:
+    df_print: paged
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Exercises: Charts
+
+You need to submit 3 histograms, 3 box plots, 3 bullet charts, and 3 additional charts of your choice (can be an existing chart type we’ve already done, but it must be done in a new way or it can be an entirely new chart type) using Tableau or PowerBI, Python and R using the data below (or your own datasets). You can also use D3. You can choose which library to use in Python or R, documentation is provided to help you decide and as you start to play around in the libraries, you will decide which you prefer.
+
+**Data source**
+We are using dataset from [Data Source URL](https://content.bellevue.edu/cst/dsc/640/datasets/ex6-2.zip) file.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# import libraries
+library(dplyr)
+library(plotly)
+```
+```{r read, echo=FALSE}
+birthrate <- read.csv("ex6-2/birth-rate.csv", header = TRUE, sep=',', dec = '.')
+crimerate <- read.csv("ex6-2/crimeratesbystate-formatted.csv", header = TRUE, sep=',', dec = '.') 
+education <- read.csv("ex6-2/education.csv", header = TRUE, sep=',', dec = '.') 
+
+# Show the data sample
+head(birthrate)
+
+# format year columns
+colnames(birthrate) <- gsub("X", "", colnames(birthrate))
+head(crimerate)
+head(education)
+```
+
+### Data structure:
+```{r echo=FALSE}
+str(birthrate)
+str(crimerate)
+str(education)
+```
+
+\pagebreak
+
+### Construct Charts:
+
+**Histogram**
+
+```{r echo=FALSE}
+# Create a Histogram
+#options(repr.plot.width = 4, repr.plot.height = 4)
+
+# create pivotted data for plotting
+birthrate_hist <- reshape2::melt(birthrate, id=c("Country")) %>%
+  dplyr::mutate("Country" = as.character(Country),
+                "Year" = as.character(variable),
+                "rate" = value) %>% 
+  dplyr::select(c("Country","Year","rate"))
+
+# create histogram of birth rate
+hist(birthrate_hist$rate)
+
+```
+
+\pagebreak
+
+**Box Plot**
+
+```{r echo=FALSE}
+# Create Box plot
+birthrate_box <- birthrate_hist %>% 
+  dplyr::filter(Country %in% c("United States"))
+
+boxplot(birthrate_box$rate ~ birthrate_box$Country)
+
+```
+
+\pagebreak
+
+**Bullet Chart**
+
+```{r echo=FALSE}
+# Create bullet chart
+fig <- plot_ly(
+    type = "indicator",
+    mode = "number+gauge+delta",
+    value = birthrate_box[1,3],
+    domain = list(x = c(0, 1), y= c(0, 1)),
+    title = list(text = "Birth Rate"),
+    delta = list(reference = 30),
+    gauge = list(
+        shape = "bullet",
+        axis = list(range = list(NULL, 30)),
+        threshold = list(
+            line = list(color = "red", width = 2),
+            thickness = 0.75,
+            value = 280),
+        steps = list(
+            list(range = c(0, 15), color = "lightgray"),
+            list(range = c(15, 25), color = "gray"))),
+    height = 150, width = 700) 
+fig <- fig %>%
+    layout(margin = list(l= 150, r= 10))
+
+fig
+```
+
+```{r echo=FALSE}
+ggplot(birthrate_box, aes(x = Year, y = rate)) 
++ geom_line() 
+
+```
+
